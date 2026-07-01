@@ -8,3 +8,4 @@ scikit-learn
 xgboost
 fuzzywuzzy
 python-Levenshtein
+imbalanced-learn
