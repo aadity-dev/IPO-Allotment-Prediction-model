@@ -1,0 +1,11 @@
+streamlit==1.57.0
+joblib==1.5.3
+pandas==3.0.2
+numpy==2.4.4
+matplotlib==3.10.9
+seaborn==0.13.2
+scikit-learn==1.8.0
+xgboost==3.2.0
+fuzzywuzzy==0.18.0
+python-Levenshtein==0.27.3
+imbalanced-learn==0.14.1

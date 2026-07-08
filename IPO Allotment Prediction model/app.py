@@ -4,6 +4,11 @@ import pandas as pd
 import numpy as np
 import os
 
+# Ensure working directory is the script's directory
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+if os.getcwd() != SCRIPT_DIR:
+    os.chdir(SCRIPT_DIR)
+
 # --- Page Config ---
 st.set_page_config(
     page_title="IPO Listing Gain & Allotment Assistant",
