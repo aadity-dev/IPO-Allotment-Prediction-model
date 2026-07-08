@@ -131,7 +131,9 @@ def main():
         ])
         calibrated_model = CalibratedClassifierCV(model_pipeline, method='isotonic', cv=5)
         calibrated_model.fit(X_train, y_train)
-        joblib.dump(calibrated_model, f"{name.lower().replace(' ', '_')}_model.pkl")
+        import os
+        os.makedirs("models", exist_ok=True)
+        joblib.dump(calibrated_model, os.path.join("models", f"{name.lower().replace(' ', '_')}_model.pkl"))
         print(f"Saved calibrated {name} model.")
 
     print(f"\nBest overall model is: {best_model_name} with ROC-AUC of {best_score:.4f}")
@@ -144,7 +146,7 @@ def main():
     # as this often gives better calibrated probabilities.
     calibrated_pipeline.fit(X_train, y_train)
     
-    joblib.dump(calibrated_pipeline, "best_model.pkl")
+    joblib.dump(calibrated_pipeline, os.path.join("models", "best_model.pkl"))
     print("\nSuccessfully trained, tuned, and saved the calibrated best model.")
 
     # --- Final Evaluation ---

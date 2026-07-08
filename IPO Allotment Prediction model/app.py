@@ -109,19 +109,19 @@ df_ipo = load_ipo_data()
 # --- Model Selection & Metadata ---
 model_info = {
     "Logistic Regression (Best, Calibrated)": {
-        "path": "best_model.pkl",
+        "path": "models/best_model.pkl",
         "auc": 0.6729,
         "accuracy": 0.6250,
         "type": "Calibrated LogReg (Isotonic)"
     },
     "XGBoost Classifier": {
-        "path": "xgboost_model.pkl",
+        "path": "models/xgboost_model.pkl",
         "auc": 0.6207,
         "accuracy": 0.5781,
         "type": "Calibrated XGBoost (Isotonic)"
     },
     "Random Forest Classifier": {
-        "path": "random_forest_model.pkl",
+        "path": "models/random_forest_model.pkl",
         "auc": 0.5852,
         "accuracy": 0.6094,
         "type": "Calibrated Random Forest (Isotonic)"
@@ -141,11 +141,28 @@ selected_model_auc = model_info[selected_model_name]["auc"]
 selected_model_acc = model_info[selected_model_name]["accuracy"]
 selected_model_type = model_info[selected_model_name]["type"]
 
+model_load_error = None
+is_lfs_pointer = False
+file_size = 0
+
+import os
+if os.path.exists(selected_model_path):
+    try:
+        file_size = os.path.getsize(selected_model_path)
+        if file_size < 1000:
+            with open(selected_model_path, "r", encoding="utf-8", errors="ignore") as f:
+                first_line = f.readline()
+                if "version https://git-lfs" in first_line or "oid sha256" in first_line:
+                    is_lfs_pointer = True
+    except Exception as e_lfs:
+        pass
+
 try:
     model = joblib.load(selected_model_path)
     model_loaded = True
 except Exception as e:
     model_loaded = False
+    model_load_error = e
 
 # Sidebar stats panel
 st.sidebar.markdown("---")
@@ -160,11 +177,10 @@ st.markdown("<div class='title-gradient'>IPO Listing Gain & Allotment Assistant<
 st.markdown("##### Empowering retail and HNI investors with data-driven listing-gain predictive probabilities.")
 
 # --- Tab Layout ---
-tab_predict, tab_analytics, tab_dataset, tab_portfolio = st.tabs([
+tab_predict, tab_analytics, tab_dataset = st.tabs([
     "🎯 Predict Listing Gains",
     "📊 Performance Diagnostics",
-    "🔍 Historical IPO Explorer",
-    "💼 Portfolio & CV Highlights"
+    "🔍 Historical IPO Explorer"
 ])
 
 # ================= TAB 1: PREDICT LISTING GAINS =================
@@ -174,6 +190,19 @@ with tab_predict:
     
     if not model_loaded:
         st.error(f"⚠️ Model file `{selected_model_path}` could not be loaded. Please ensure retraining completed successfully.")
+        if is_lfs_pointer:
+            st.warning(
+                f"ℹ️ **Git LFS Pointer Detected:** The file `{selected_model_path}` on Hugging Face appears to be a tiny Git LFS pointer text file (size: {file_size} bytes) "
+                "instead of the actual binary model file. This typically happens if the file was committed via git without uploading the LFS media payload.\n\n"
+                "**How to Fix:**\n"
+                "1. Go to your Hugging Face Space page.\n"
+                "2. Click on the **Files and versions** tab.\n"
+                "3. Click **Add file** -> **Upload files**.\n"
+                "4. Drag and drop the actual `random_forest_model.pkl` (and other `.pkl` files) from your local project directory directly into the browser to upload the full binary, then commit the changes."
+            )
+        elif model_load_error:
+            st.markdown("##### 🔍 Error Traceback")
+            st.exception(model_load_error)
     else:
         col1, col2 = st.columns([1, 1], gap="large")
         
@@ -326,34 +355,40 @@ with tab_analytics:
     st.markdown("---")
     st.markdown("#### 📈 Diagnostic Visualizations")
     
+    graphs_dir = "graphs"
     col_plot1, col_plot2 = st.columns(2)
     
     with col_plot1:
-        if os.path.exists("target_distribution_improved.png"):
-            st.image("target_distribution_improved.png", caption="Target Variable Class Balance (Listing Gains vs No Listing Gains)", use_container_width=True)
+        target_dist_path = os.path.join(graphs_dir, "target_distribution_improved.png")
+        if os.path.exists(target_dist_path):
+            st.image(target_dist_path, caption="Target Variable Class Balance (Listing Gains vs No Listing Gains)", use_container_width=True)
         else:
             st.warning("Target distribution plot not found.")
             
-        if os.path.exists("confusion_matrix.png"):
-            st.image("confusion_matrix.png", caption="Confusion Matrix of the Best Calibrated Model", use_container_width=True)
+        cm_path = os.path.join(graphs_dir, "confusion_matrix.png")
+        if os.path.exists(cm_path):
+            st.image(cm_path, caption="Confusion Matrix of the Best Calibrated Model", use_container_width=True)
         else:
             st.warning("Confusion matrix plot not found.")
             
     with col_plot2:
-        if os.path.exists("correlation_heatmap.png"):
-            st.image("correlation_heatmap.png", caption="Feature Correlation Heatmap", use_container_width=True)
+        corr_heatmap_path = os.path.join(graphs_dir, "correlation_heatmap.png")
+        if os.path.exists(corr_heatmap_path):
+            st.image(corr_heatmap_path, caption="Feature Correlation Heatmap", use_container_width=True)
         else:
             st.warning("Correlation heatmap not found.")
             
-        if os.path.exists("precision_recall_curve.png"):
-            st.image("precision_recall_curve.png", caption="Precision-Recall Curve (AUC)", use_container_width=True)
+        pr_curve_path = os.path.join(graphs_dir, "precision_recall_curve.png")
+        if os.path.exists(pr_curve_path):
+            st.image(pr_curve_path, caption="Precision-Recall Curve (AUC)", use_container_width=True)
         else:
             st.warning("Precision-Recall curve not found.")
             
-    if os.path.exists("prf_vs_threshold.png"):
+    prf_vs_threshold_path = os.path.join(graphs_dir, "prf_vs_threshold.png")
+    if os.path.exists(prf_vs_threshold_path):
         st.markdown("---")
         st.markdown("#### 🎚️ Decision Threshold Optimization")
-        st.image("prf_vs_threshold.png", caption="Precision, Recall, and F1-Score vs. Classification Threshold", use_container_width=True)
+        st.image(prf_vs_threshold_path, caption="Precision, Recall, and F1-Score vs. Classification Threshold", use_container_width=True)
 
 # ================= TAB 3: HISTORICAL EXPLORER =================
 with tab_dataset:
@@ -411,41 +446,6 @@ with tab_dataset:
             use_container_width=True
         )
 
-# ================= TAB 4: PORTFOLIO & CV HIGHLIGHTS =================
-with tab_portfolio:
-    st.markdown("### 💼 CV Bullet Points & Machine Learning Methodologies")
-    st.write("Make this project stand out on your Resume/CV by using structured, professional impact statements.")
-    
-    st.info("💡 **Pro Tip:** Align these bullet points with terms like 'Predictive Modeling', 'Class Imbalance Correction', and 'Probability Calibration' to pass recruiter Applicant Tracking Systems (ATS).")
-    
-    st.markdown("""
-    #### 📝 Ready-to-use CV Bullet Points
-    
-    * **End-to-End Predictive Modeling:** Designed and deployed an end-to-end machine learning pipeline predicting IPO allotment and positive listing gain probabilities, achieving a peak **ROC-AUC of 0.6729** using a tuned Logistic Regression classifier.
-    * **Class Imbalance Correction (SMOTE):** Addressed significant target listing-gain class imbalance on historical IPO data (2022–2025) by implementing **Synthetic Minority Over-sampling Technique (SMOTE)**, raising macro-level classification precision and recall by **14%**.
-    * **Probability Calibration (Isotonic Regression):** Applied **Isotonic Probability Calibration** (`CalibratedClassifierCV`) on out-of-fold predictions, correcting model-confidence drift to ensure returned allotment probabilities map to actual empirical outcomes.
-    * **Feature Engineering & Preprocessing:** Engineered specialized financial indicators—including log-transformed Issue Size, binned investor categories (Retail/HNI), and inverse subscription intensity—integrated inside a robust `ColumnTransformer` preprocessing pipeline.
-    * **Interactive Cloud Deployment:** Developed a modern, glassmorphic **Streamlit dashboard** containerized and deployed live on **Hugging Face Spaces**, permitting real-time risk assessment and database indexing for retail investors.
-    
-    ---
-    
-    #### ⚙️ Technical Architecture Summary
-    """)
-    
-    col_arch1, col_arch2 = st.columns(2)
-    with col_arch1:
-        st.markdown("""
-        **Data Processing Pipeline:**
-        1. **Fuzzy Merge:** Automated joining of fragmented datasets (raw allotment lists vs pricing datasets) using Levenshtein distance string similarity scores.
-        2. **Pipeline Scaling:** Standardized skewed features via `StandardScaler` and applied `OneHotEncoder` to categorical binned subscriber categories.
-        3. **Imputation:** Integrated median-based imputation for missing numerical dimensions inside scikit-learn pipeline blocks to prevent data leakage.
-        """)
-    with col_arch2:
-        st.markdown("""
-        **Validation & Tuning Strategy:**
-        * **Hyperparameter Tuning:** Conducted exhaustive cross-validated parameter sweeps (`GridSearchCV`) across Logistic Regression, Random Forest, and XGBoost models.
-        * **Isotonic Calibration:** Retained models are calibrated on non-resampled splits. This is a critical step for application deployment since SMOTE alters the dataset's class prior distribution, skewing raw predicted probabilities.
-        """)
 
 # --- Footer ---
 st.markdown("---")

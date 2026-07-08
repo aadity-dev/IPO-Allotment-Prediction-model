@@ -116,4 +116,4 @@ You can deploy your files using either the Hugging Face Web UI or Git.
 
 ### Step 3: Wait for Build
 Hugging Face will automatically detect `requirements.txt`, install all libraries, and make the app live at:
-https://huggingface.co/spaces/Adit-11/ipo-allotment-predictor
+`https://huggingface.co/spaces/YOUR_USERNAME/YOUR_SPACE_NAME`

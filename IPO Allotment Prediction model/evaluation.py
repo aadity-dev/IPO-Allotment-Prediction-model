@@ -144,10 +144,13 @@ def main():
     df = create_features(df)
 
     # --- Generate and Save All Plots ---
-    model_dir = "."
+    model_dir = "models"
+    graphs_dir = "graphs"
+    import os
+    os.makedirs(graphs_dir, exist_ok=True)
     
     # Create improved target distribution plot
-    target_dist_path = f"{model_dir}/target_distribution_improved.png"
+    target_dist_path = f"{graphs_dir}/target_distribution_improved.png"
     plot_target_distribution(df, target_dist_path)
 
     numerical_features = ['Log_Issue_Size', 'Inverse_Subscription', 'gmp_percentage', 'revenue_crores', 'profit_margin']
@@ -192,10 +195,10 @@ def main():
         print(f"Best Model Accuracy: {best_accuracy:.4f}")
 
         # Set file paths for plots
-        cm_path = f"{model_dir}/confusion_matrix.png"
-        pr_curve_path = f"{model_dir}/precision_recall_curve.png"
-        corr_heatmap_path = f"{model_dir}/correlation_heatmap.png"
-        prf_threshold_path = f"{model_dir}/prf_vs_threshold.png"
+        cm_path = f"{graphs_dir}/confusion_matrix.png"
+        pr_curve_path = f"{graphs_dir}/precision_recall_curve.png"
+        corr_heatmap_path = f"{graphs_dir}/correlation_heatmap.png"
+        prf_threshold_path = f"{graphs_dir}/prf_vs_threshold.png"
         
         # Generate plots
         plot_confusion_matrix(y_test, y_pred_best, cm_path)
