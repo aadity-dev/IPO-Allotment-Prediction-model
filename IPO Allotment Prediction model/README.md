@@ -72,48 +72,5 @@ streamlit run app.py
 
 ## ☁️ Deployment Guide: Hugging Face Spaces
 
-Deploying this app live to **Hugging Face Spaces** takes less than 3 minutes. Hugging Face will automatically read the YAML metadata at the top of this `README.md` and spin up a secure Streamlit instance!
-
-### Step 1: Create a Space on Hugging Face
-1. Log in to [Hugging Face](https://huggingface.co/) (create a free account if you don't have one).
-2. Click on your profile icon in the top right and select **New Space** (or go to `huggingface.co/new-space`).
-3. Set your **Space Name** (e.g., `ipo-allotment-predictor`).
-4. Select **Streamlit** as the SDK.
-5. Keep it **Public** (recommended for portfolio showcases) or set to Private.
-6. Click **Create Space**.
-
-### Step 2: Upload Files to the Space
-You can deploy your files using either the Hugging Face Web UI or Git.
-
-#### Method A: Direct Upload via Web Browser (Easiest)
-1. In your newly created Hugging Face Space, click on the **Files and versions** tab at the top.
-2. Click **Add file** -> **Upload files**.
-3. Drag and drop the following files from your project folder:
-   - `app.py` (The main web app)
-   - `requirements.txt` (Declares dependencies)
-   - `best_model.pkl` (The winner calibrated Logistic Regression model)
-   - `random_forest_model.pkl` (The calibrated Random Forest model)
-   - `xgboost_model.pkl` (The calibrated XGBoost model)
-   - `ipo.csv` (Historical dataset)
-   - All evaluation plots (Optional, to display in the diagnostics tab):
-     - `target_distribution_improved.png`
-     - `confusion_matrix.png`
-     - `precision_recall_curve.png`
-     - `correlation_heatmap.png`
-     - `prf_vs_threshold.png`
-4. Write a commit message (e.g., `Initial commit`) and click **Commit changes to main**.
-
-#### Method B: Deploy using Git (Command Line)
-1. Copy the clone command from your Space's page (e.g., `git clone https://huggingface.co/spaces/YOUR_USERNAME/YOUR_SPACE_NAME`).
-2. Run the command in your terminal to clone the space repository locally.
-3. Copy the project files (listed in Method A) into the cloned directory.
-4. Run git commands to commit and push:
-   ```bash
-   git add .
-   git commit -m "Deploy IPO predictor app"
-   git push
-   ```
-
-### Step 3: Wait for Build
-Hugging Face will automatically detect `requirements.txt`, install all libraries, and make the app live at:
-`https://huggingface.co/spaces/YOUR_USERNAME/YOUR_SPACE_NAME`
+Deploying this app live to **Hugging Face Spaces** .
+https://huggingface.co/spaces/Adit-11/ipo-allotment-predictor
